@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openejb-jar xmlns="http://www.openejb.org/openejb-jar/1.1">
+    <properties>
+        openejb.deployer.jmx.active = false
+        openejb.webservices.enabled = false
+    </properties>
+</openejb-jar>
