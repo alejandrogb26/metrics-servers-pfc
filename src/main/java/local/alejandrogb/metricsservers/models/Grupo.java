@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Grupo", description = "Representa un grupo de usuarios del sistema con sus permisos asociados")
 public class Grupo {
 	public static final String TABLE = "grupos";
 	public static final String TABLE_GLOBAL_PRM = "grupo_permiso_global";
@@ -17,9 +20,16 @@ public class Grupo {
 	public static final String COL_ID_BY_SESSION = "gid";
 	public static final String COL_NOMBRE_BY_SESSION = "gnombre";
 
+	@Schema(description = "Identificador único del grupo", example = "1")
 	private int id;
+
+	@Schema(description = "Nombre del grupo", example = "Administradores")
 	private String nombre;
+
+	@Schema(description = "Indica si el grupo tiene privilegios de superadministrador", example = "true")
 	private Boolean superAdmin;
+
+	@Schema(description = "Mapa de permisos asignados al grupo")
 	private PermissionMap<Integer> permisos;
 
 	public Grupo() {

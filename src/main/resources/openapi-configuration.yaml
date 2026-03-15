@@ -1,0 +1,4 @@
+resourcePackages:
+  - local.alejandrogb.metricsservers.api.resources
+
+prettyPrint: true

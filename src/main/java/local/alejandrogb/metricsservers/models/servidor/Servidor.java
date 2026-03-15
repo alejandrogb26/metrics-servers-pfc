@@ -7,6 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Servidor", description = "Representa un servidor monitorizado por el sistema")
 public class Servidor {
 	public static final String TABLE = "servidores";
 
@@ -20,9 +23,37 @@ public class Servidor {
 	public static final String COL_SECCION_ID = "seccionId";
 	public static final String COL_IMAGEN = "imagen";
 
+	@Schema(description = "Identificador interno del servidor", example = "1")
 	private int id;
-	private String serverId, dns, hostname, prettyOs, arch, kernel, imagen, imagenUrl;
+
+	@Schema(description = "Identificador único del servidor utilizado por el sistema de métricas", example = "server-01")
+	private String serverId;
+
+	@Schema(description = "Nombre DNS del servidor", example = "server01.example.com")
+	private String dns;
+
+	@Schema(description = "Hostname del sistema operativo", example = "server01")
+	private String hostname;
+
+	@Schema(description = "Nombre legible del sistema operativo", example = "Debian GNU/Linux 12 (bookworm)")
+	private String prettyOs;
+
+	@Schema(description = "Arquitectura del sistema", example = "x86_64")
+	private String arch;
+
+	@Schema(description = "Versión del kernel del sistema operativo", example = "6.1.0-18-amd64")
+	private String kernel;
+
+	@Schema(description = "Nombre del archivo de imagen asociado al servidor", example = "server01.png")
+	private String imagen;
+
+	@Schema(description = "URL pública de la imagen del servidor", example = "https://cdn.example.com/images/server01.png", accessMode = Schema.AccessMode.READ_ONLY)
+	private String imagenUrl;
+
+	@Schema(description = "ID de la sección a la que pertenece el servidor", example = "2")
 	private int seccion;
+
+	@Schema(description = "Lista de IDs de servicios asociados al servidor", example = "[1,2,3]")
 	private List<Integer> servicios;
 
 	public Servidor() {

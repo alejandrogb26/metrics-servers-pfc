@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Servicio", description = "Representa un servicio que puede estar asociado a uno o varios servidores")
 public class Servicio {
 	public static final String TABLE = "servicios";
 	public static final String TABLE_RELATION = "servidores_servicios";
@@ -13,8 +16,17 @@ public class Servicio {
 	public static final String COL_NOMBRE = "nombre";
 	public static final String COL_LOGO = "logo";
 
+	@Schema(description = "Identificador único del servicio", example = "3")
 	private int id;
-	private String nombre, logo, urlLogo;
+
+	@Schema(description = "Nombre del servicio", example = "Grafana")
+	private String nombre;
+
+	@Schema(description = "Nombre del archivo de logo almacenado", example = "grafana.png")
+	private String logo;
+
+	@Schema(description = "URL pública del logo del servicio", example = "https://cdn.example.com/logos/grafana.png")
+	private String urlLogo;
 
 	public Servicio() {
 	}

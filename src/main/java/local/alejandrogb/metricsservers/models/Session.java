@@ -3,12 +3,19 @@ package local.alejandrogb.metricsservers.models;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.ValidationException;
 import local.alejandrogb.metricsservers.models.usuario.UsuarioAuth;
 
+@Schema(name = "Session", description = "Información de sesión del usuario autenticado, incluyendo sus datos básicos, grupo y permisos")
 public class Session {
+	@Schema(description = "Datos básicos del usuario autenticado")
 	private UsuarioAuth usuario;
+
+	@Schema(description = "Grupo al que pertenece el usuario")
 	private Grupo grupo;
+
+	@Schema(description = "Mapa de permisos del usuario (globales y por sección)")
 	private PermissionMap<String> permisos;
 
 	public Session() {

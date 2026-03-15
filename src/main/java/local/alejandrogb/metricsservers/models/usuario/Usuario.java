@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Usuario", description = "Representa un usuario del sistema")
 public class Usuario {
 	public static final String TABLE = "usuarios";
 
@@ -17,9 +20,31 @@ public class Usuario {
 	public static final String COL_ACTIVE = "active";
 	public static final String COL_FOTO_PERFIL = "fotoPerfil";
 
-	private int id, grupoId;
-	private String nombre, apel1, apel2, username, fotoPerfil;
-	private String urlFoto; // Este campo NO está en la BD, se llena al vuelo para el cliente.
+	@Schema(description = "Identificador único del usuario", example = "5", accessMode = Schema.AccessMode.READ_ONLY)
+	private int id;
+
+	@Schema(description = "ID del grupo al que pertenece el usuario", example = "2")
+	private int grupoId;
+
+	@Schema(description = "Nombre del usuario", example = "Alejandro")
+	private String nombre;
+
+	@Schema(description = "Primer apellido", example = "García")
+	private String apel1;
+
+	@Schema(description = "Segundo apellido", example = "Blanco")
+	private String apel2;
+
+	@Schema(description = "Nombre de usuario utilizado para autenticación", example = "alejandrogb")
+	private String username;
+
+	@Schema(description = "Nombre del archivo de foto de perfil almacenado", example = "user_5_1717420000.png")
+	private String fotoPerfil;
+
+	@Schema(description = "URL pública de la foto de perfil del usuario", example = "https://cdn.example.com/users/user_5_1717420000.png", accessMode = Schema.AccessMode.READ_ONLY)
+	private String urlFoto;
+
+	@Schema(description = "Indica si el usuario está activo", example = "true")
 	private Boolean active;
 
 	public Usuario() {

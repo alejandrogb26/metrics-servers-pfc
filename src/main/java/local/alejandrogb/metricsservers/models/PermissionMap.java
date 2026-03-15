@@ -3,8 +3,14 @@ package local.alejandrogb.metricsservers.models;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "PermissionMap", description = "Estructura que agrupa permisos globales y permisos específicos por sección")
 public class PermissionMap<T> {
+	@Schema(description = "Lista de permisos globales aplicables a todo el sistema", example = "[1, 2, 3]")
 	private List<T> global;
+
+	@Schema(description = "Mapa de permisos por sección. La clave es el ID de la sección", example = "{\"10\": [1,2], \"20\": [3]}")
 	private Map<Integer, List<T>> sections; // Clave: seccionId
 
 	public PermissionMap() {

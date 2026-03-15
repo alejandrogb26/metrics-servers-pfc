@@ -4,10 +4,21 @@ import java.util.List;
 
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "SystemMetrics", description = "Métricas del sistema operativo del servidor: CPU, memoria, swap, discos y red")
 public class SystemMetrics {
+
+	@Schema(description = "Información sobre el uso de CPU del sistema")
 	public static class Cpu {
+
+		@Schema(description = "Porcentaje de uso de CPU", example = "34.5")
 		private Double percent;
+
+		@Schema(description = "Número de núcleos de CPU disponibles", example = "8")
 		private Integer cores;
+
+		@Schema(description = "Load average del sistema (1, 5 y 15 minutos)", example = "[0.12, 0.34, 0.28]")
 		@BsonProperty("loadavg")
 		private List<Double> loadAvg;
 
@@ -39,11 +50,18 @@ public class SystemMetrics {
 		}
 	}
 
+	@Schema(description = "Información sobre el uso de memoria RAM")
 	public static class Memoria {
+
+		@Schema(description = "Cantidad de memoria usada en bytes", example = "4294967296")
 		@BsonProperty("used_bytes")
 		private Long usedBytes;
+
+		@Schema(description = "Cantidad total de memoria disponible en bytes", example = "8589934592")
 		@BsonProperty("total_bytes")
 		private Long totalBytes;
+
+		@Schema(description = "Porcentaje de memoria usada", example = "50.0")
 		private Double percent;
 
 		public Memoria() {
@@ -74,12 +92,21 @@ public class SystemMetrics {
 		}
 	}
 
+	@Schema(description = "Información sobre el uso de memoria swap")
 	public static class Swap {
+
+		@Schema(description = "Indica si el sistema tiene swap configurado", example = "true")
 		private Boolean present;
+
+		@Schema(description = "Cantidad de swap usado en bytes", example = "104857600")
 		@BsonProperty("used_bytes")
 		private Long usedBytes;
+
+		@Schema(description = "Cantidad total de swap disponible en bytes", example = "2147483648")
 		@BsonProperty("total_bytes")
 		private Long totalBytes;
+
+		@Schema(description = "Porcentaje de swap usado", example = "4.8")
 		private Double percent;
 
 		public Swap() {
@@ -118,15 +145,28 @@ public class SystemMetrics {
 		}
 	}
 
+	@Schema(description = "Información de uso de un disco montado en el sistema")
 	public static class Disk {
+
+		@Schema(description = "Punto de montaje del sistema de archivos", example = "/")
 		private String mount;
+
+		@Schema(description = "Tipo de sistema de archivos", example = "ext4")
 		@BsonProperty("fstype")
 		private String fsType;
+
+		@Schema(description = "Dispositivo de almacenamiento", example = "/dev/sda1")
 		private String device;
+
+		@Schema(description = "Espacio usado en bytes", example = "10737418240")
 		@BsonProperty("used_bytes")
 		private Long usedBytes;
+
+		@Schema(description = "Espacio total del disco en bytes", example = "21474836480")
 		@BsonProperty("total_bytes")
 		private Long totalBytes;
+
+		@Schema(description = "Porcentaje de uso del disco", example = "50.0")
 		private Double percent;
 
 		public Disk() {
@@ -181,9 +221,14 @@ public class SystemMetrics {
 		}
 	}
 
+	@Schema(description = "Estadísticas de tráfico de red del sistema")
 	public static class Network {
+
+		@Schema(description = "Cantidad total de bytes recibidos", example = "104857600")
 		@BsonProperty("rx_bytes_total")
 		private Long netRx;
+
+		@Schema(description = "Cantidad total de bytes enviados", example = "52428800")
 		@BsonProperty("tx_bytes_total")
 		private Long netTx;
 
@@ -207,10 +252,19 @@ public class SystemMetrics {
 		}
 	}
 
+	@Schema(description = "Información de CPU")
 	public Cpu cpu;
+
+	@Schema(description = "Información de memoria RAM")
 	public Memoria mem;
+
+	@Schema(description = "Información de memoria swap")
 	public Swap swap;
+
+	@Schema(description = "Lista de discos del sistema")
 	public List<Disk> disks;
+
+	@Schema(description = "Información de red del sistema")
 	public Network net;
 
 	public SystemMetrics() {

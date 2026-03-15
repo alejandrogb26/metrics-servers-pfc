@@ -3,7 +3,11 @@ package local.alejandrogb.metricsservers.models;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Ambito", description = "Representa un ámbito funcional del sistema al que pueden pertenecer distintos permisos")
 public class Ambito {
+
 	public static final String TABLE = "ambitos";
 	public static final String COL_ID = "id";
 	public static final String COL_NOMBRE = "nombre";
@@ -13,8 +17,14 @@ public class Ambito {
 	public static final String COL_NOMBRE_BY_PERM = "a_nombre";
 	public static final String COL_DESCRIP_BY_PERM = "a_descripcion";
 
+	@Schema(description = "Identificador único del ámbito", example = "1")
 	private int id;
-	private String nombre, descripcion;
+
+	@Schema(description = "Nombre del ámbito", example = "Servidor")
+	private String nombre;
+
+	@Schema(description = "Descripción del ámbito", example = "Ámbito relacionado con la gestión de servidores")
+	private String descripcion;
 
 	public Ambito() {
 	}
@@ -58,17 +68,8 @@ public class Ambito {
 				rs.getString(COL_DESCRIP_BY_PERM));
 	}
 
-//	public Map<String, Object> toMap() {
-//		Map<String, Object> map = new LinkedHashMap<String, Object>();
-//
-//		map.put(COL_NOMBRE, nombre);
-//		map.put(COL_DESCRIP, descripcion);
-//		return map;
-//	}
-
 	@Override
 	public String toString() {
 		return "Ambito [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + "]";
 	}
-
 }

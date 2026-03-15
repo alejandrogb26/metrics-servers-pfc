@@ -21,10 +21,11 @@ public class TokenFilter implements ContainerRequestFilter {
 	@Override
 	public void filter(ContainerRequestContext ctx) throws IOException {
 
-		// String path = ctx.getUriInfo().getPath();
+		String path = ctx.getUriInfo().getPath();
 
-		// Si quieres dejar algo público:
-		// if (path.contains("login")) return;
+		if (path.startsWith("openapi") || path.contains("swagger-ui")) {
+			return;
+		}
 
 		String authHeader = ctx.getHeaderString("Authorization");
 

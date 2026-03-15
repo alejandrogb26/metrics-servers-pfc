@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Seccion", description = "Representa una sección funcional del sistema donde se agrupan distintos servicios o permisos")
 public class Seccion {
 	public static final String TABLE = "secciones";
 
@@ -12,8 +15,13 @@ public class Seccion {
 	public static final String COL_NOMBRE = "nombre";
 	public static final String COL_DESCRIP = "descripcion";
 
+	@Schema(description = "Identificador único de la sección", example = "1")
 	private int id;
+
+	@Schema(description = "Nombre de la sección", example = "CPU")
 	private String nombre;
+
+	@Schema(description = "Descripción de la sección", example = "Métricas relacionadas con el uso de CPU")
 	private String descripcion;
 
 	public Seccion() {

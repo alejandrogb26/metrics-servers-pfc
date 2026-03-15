@@ -3,6 +3,9 @@ package local.alejandrogb.metricsservers.models;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Permiso", description = "Representa un permiso que puede asignarse a grupos o usuarios dentro de un ámbito concreto")
 public class Permiso {
 	public static final String TABLE = "permisos";
 	public static final String COL_ID = "id";
@@ -14,8 +17,16 @@ public class Permiso {
 	public static final String COL_NOMBRE_BY_SIMPL = "p_nombre";
 	public static final String COL_DESCRIP_BY_SIMPL = "p_descripcion";
 
+	@Schema(description = "Identificador único del permiso", example = "10")
 	private int id;
-	private String nombre, descripcion;
+
+	@Schema(description = "Nombre del permiso", example = "SERVIDOR_EDITAR")
+	private String nombre;
+
+	@Schema(description = "Descripción del permiso", example = "Permite modificar la configuración de un servidor")
+	private String descripcion;
+
+	@Schema(description = "Ámbito al que pertenece el permiso")
 	private Ambito ambito;
 
 	public Permiso() {

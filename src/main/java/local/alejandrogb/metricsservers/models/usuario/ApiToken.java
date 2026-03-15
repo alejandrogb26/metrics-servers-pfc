@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "ApiToken", description = "Token de acceso utilizado para autenticarse en la API")
 public class ApiToken {
 	public static final String TABLE = "api_tokens";
 	public static final String COL_ID = "id";
@@ -14,9 +17,19 @@ public class ApiToken {
 	public static final String COL_ACTIVE = "active";
 	public static final String COL_CREATED_AT = "createdAt";
 
-	private int id, usuarioId;
+	@Schema(description = "Identificador del token", example = "15", accessMode = Schema.AccessMode.READ_ONLY)
+	private int id;
+
+	@Schema(description = "ID del usuario propietario del token", example = "3", accessMode = Schema.AccessMode.READ_ONLY)
+	private int usuarioId;
+
+	@Schema(description = "Token utilizado para autenticación Bearer", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
 	private String token;
+
+	@Schema(description = "Indica si el token está activo", example = "true")
 	private boolean active;
+
+	@Schema(description = "Fecha de creación del token", example = "2024-06-01T10:15:30", accessMode = Schema.AccessMode.READ_ONLY)
 	private LocalDateTime createdAt;
 
 	public ApiToken() {
