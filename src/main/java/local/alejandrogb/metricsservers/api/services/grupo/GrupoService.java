@@ -1,6 +1,5 @@
 package local.alejandrogb.metricsservers.api.services.grupo;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -129,15 +128,6 @@ public class GrupoService {
 
 		if (existente == null)
 			return false;
-
-		// 2. Construcción de campos a actualizar
-		Map<String, Object> fieldsToUpdate = new LinkedHashMap<>();
-
-		if (g.getNombre() != null) {
-			fieldsToUpdate.put(Grupo.COL_NOMBRE, g.getNombre());
-		}
-
-		fieldsToUpdate.put(Grupo.COL_SUPER_ADMIN, g.isSuperAdmin());
 
 		try {
 

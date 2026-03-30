@@ -9,7 +9,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import local.alejandrogb.metricsservers.dao.DaoApi;
+import local.alejandrogb.metricsservers.api.services.ambito.AmbitoService;
 import local.alejandrogb.metricsservers.models.Ambito;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,13 +25,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Tag(name = "Ámbitos", description = "Operaciones relacionadas con los ámbitos del sistema")
 public class AmbitoResource {
 
-	private final DaoApi dao = DaoApi.getInstance();
+	private final AmbitoService service = new AmbitoService();
 
 	@GET
 	@Operation(summary = "Obtiene todos los ámbitos", description = "Devuelve una lista con todos los ámbitos registrados en el sistema")
 	@ApiResponse(responseCode = "200", description = "Lista de ámbitos", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Ambito.class))))
-	public List<Ambito> getPermisos() {
-		return dao.findAllAmbito();
+	public List<Ambito> getAll() {
+		return service.getAll();
 	}
 
 	@GET
@@ -39,12 +39,9 @@ public class AmbitoResource {
 	@Operation(summary = "Obtiene un ámbito por ID", description = "Devuelve la información de un ámbito específico")
 	@ApiResponse(responseCode = "200", description = "Ámbito encontrado", content = @Content(schema = @Schema(implementation = Ambito.class)))
 	@ApiResponse(responseCode = "404", description = "Ámbito no encontrado")
-	public Response getAmbitoById(
-
+	public Response getById(
 			@Parameter(description = "Identificador único del ámbito", required = true, example = "1") @PathParam("id") int id) {
 
-		Ambito ambito = dao.findAmbitoById(id);
-
-		return (ambito != null) ? Response.ok(ambito).build() : Response.status(404).build();
+		return Response.ok(service.getById(id)).build();
 	}
 }

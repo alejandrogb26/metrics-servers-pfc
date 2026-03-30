@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.PutObjectArgs;
 import io.minio.http.Method;
+import local.alejandrogb.metricsservers.utils.EnvConfig;
 import local.alejandrogb.metricsservers.utils.MinioConfig;
 
 /**
@@ -42,12 +43,12 @@ public class MinioService {
 	/**
 	 * Bucket utilizado para almacenar imágenes asociadas a usuarios.
 	 */
-	public static final String BUCKET_USUARIOS = "usuarios";
+	public static final String BUCKET_USUARIOS = EnvConfig.BUCKET_USERS;
 
 	/**
 	 * Bucket utilizado para almacenar imágenes asociadas a servidores.
 	 */
-	public static final String BUCKET_SERVIDORES = "servidores";
+	public static final String BUCKET_SERVIDORES = EnvConfig.BUCKET_SERVIDORES;
 
 	/**
 	 * Bucket utilizado para almacenar imágenes asociadas a servicios.
@@ -56,7 +57,7 @@ public class MinioService {
 	 * mediante URL sin necesidad de firma.
 	 * </p>
 	 */
-	public static final String BUCKET_SERVICIOS = "servicios";
+	public static final String BUCKET_SERVICIOS = EnvConfig.BUCKET_SERVICIOS;
 
 	/**
 	 * Genera una URL de acceso para una imagen almacenada en MinIO.

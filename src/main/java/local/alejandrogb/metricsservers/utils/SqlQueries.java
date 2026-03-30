@@ -119,25 +119,6 @@ public final class SqlQueries {
 	public static final String FIND_FULL_SECCN = "SELECT * FROM secciones";
 
 	// ====================================================
-	// SENTENCIAS SQL ---> USUARIOS
-	// ====================================================
-
-	/**
-	 * Recupera un usuario por su identificador.
-	 */
-	public static final String FIND_FULL_USER_BY_ID = "SELECT * FROM usuarios WHERE id = ?";
-
-	/**
-	 * Recupera todos los usuarios del sistema.
-	 */
-	public static final String FIND_FULL_USER = "SELECT * FROM usuarios";
-
-	/**
-	 * Busca usuarios cuyo nombre de usuario coincida con un patrón.
-	 */
-	public static final String FIND_USERNAME_USER = "SELECT username FROM usuarios WHERE username LIKE ?";
-
-	// ====================================================
 	// SENTENCIAS SQL ---> GRUPOS
 	// ====================================================
 
@@ -172,29 +153,29 @@ public final class SqlQueries {
 	public static final String INSERT_PRM_SECCN_BY_GROUP = "INSERT INTO grupo_seccion (grupoId, seccionId, permisoId) VALUES (?, ?, ?)";
 
 	// ====================================================
-	// SENTENCIAS SQL ---> TOKENS API
-	// ====================================================
-
-	/**
-	 * Recupera todos los tokens de API asociados a un usuario.
-	 */
-	public static final String FIND_TOKENS_BY_USUARIOID = "SELECT * FROM api_tokens WHERE usuarioId = ?";
-
-	// ====================================================
 	// SENTENCIAS SQL ---> AUTHENTICATION
 	// ====================================================
 
+	public static final String FIND_GRUPOS_BY_DNS_BASE = """
+			    SELECT id, nombre, dn, superadmin
+			    FROM grupos
+			    WHERE dn IN (%s)
+			""";
+
+	public static final String FIND_USUARIO_APP_BY_AD_OBJECT_ID = """
+			    SELECT id, adObjectId, username, fotoPerfil
+			    FROM usuarios_app
+			    WHERE adObjectId = ?
+			""";
+
 	/**
-	 * Consulta utilizada durante el proceso de autenticación mediante token.
-	 * Devuelve información del usuario y del grupo al que pertenece.
+	 * Busca un registro en usuarios_app por sAMAccountName (username). Ruta
+	 * principal cuando no se dispone del objectGUID del AD.
 	 */
-	public static final String FIND_USER_GROUP_AUTH = """
-			SELECT u.username, u.nombre, u.apel1, u.apel2, u.active,
-			             g.id as gid, g.nombre as gnombre, g.superadmin
-			      FROM usuarios u
-			      JOIN api_tokens t ON u.id = t.usuarioId
-			      JOIN grupos g ON u.grupoId = g.id
-			      WHERE t.token = ? AND t.active = 1
+	public static final String FIND_USUARIO_APP_BY_USERNAME = """
+			    SELECT id, adObjectId, username, fotoPerfil
+			    FROM usuarios_app
+			    WHERE username = ?
 			""";
 
 	/**

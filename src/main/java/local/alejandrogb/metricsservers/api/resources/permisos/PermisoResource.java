@@ -9,7 +9,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import local.alejandrogb.metricsservers.dao.DaoApi;
+import local.alejandrogb.metricsservers.api.services.permiso.PermisoService;
 import local.alejandrogb.metricsservers.models.Permiso;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,13 +25,13 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 @Tag(name = "Permisos", description = "Consulta de permisos del sistema")
 public class PermisoResource {
 
-	private final DaoApi dao = DaoApi.getInstance();
+	private final PermisoService service = new PermisoService();
 
 	@GET
 	@Operation(summary = "Obtiene todos los permisos", description = "Devuelve la lista completa de permisos registrados en el sistema")
 	@ApiResponse(responseCode = "200", description = "Lista de permisos", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Permiso.class))))
-	public List<Permiso> getPermisos() {
-		return dao.findAllPermisos();
+	public List<Permiso> getAll() {
+		return service.getAll();
 	}
 
 	@GET
@@ -39,12 +39,9 @@ public class PermisoResource {
 	@Operation(summary = "Obtiene un permiso por ID", description = "Devuelve la información de un permiso específico")
 	@ApiResponse(responseCode = "200", description = "Permiso encontrado", content = @Content(schema = @Schema(implementation = Permiso.class)))
 	@ApiResponse(responseCode = "404", description = "Permiso no encontrado")
-	public Response getPermisoById(
-
+	public Response getById(
 			@Parameter(description = "Identificador único del permiso", required = true, example = "1") @PathParam("id") int id) {
 
-		Permiso p = dao.findPermisoById(id);
-
-		return (p != null) ? Response.ok(p).build() : Response.status(404).build();
+		return Response.ok(service.getById(id)).build();
 	}
 }

@@ -7,21 +7,22 @@ import jakarta.ws.rs.ext.Provider;
 import local.alejandrogb.metricsservers.exceptions.api.ApiError;
 
 /**
- * Mapper encargado de transformar excepciones {@link ValidationException}
- * en respuestas HTTP adecuadas para la API.
+ * Mapper encargado de transformar excepciones {@link ValidationException} en
+ * respuestas HTTP adecuadas para la API.
  *
  * <p>
- * Esta clase forma parte del sistema global de manejo de errores basado
- * en {@link ExceptionMapper}. Cuando durante el procesamiento de una
- * petición se detecta un error de validación en los datos proporcionados
- * por el cliente, el framework JAX-RS invoca automáticamente este mapper
- * para generar una respuesta HTTP estructurada.
+ * Esta clase forma parte del sistema global de manejo de errores basado en
+ * {@link ExceptionMapper}. Cuando durante el procesamiento de una petición se
+ * detecta un error de validación en los datos proporcionados por el cliente, el
+ * framework JAX-RS invoca automáticamente este mapper para generar una
+ * respuesta HTTP estructurada.
  * </p>
  *
  * <p>
- * La respuesta se devuelve con código de estado {@code 422 Unprocessable Entity},
- * indicando que la petición fue correctamente interpretada por el servidor,
- * pero contiene datos inválidos que impiden completar la operación solicitada.
+ * La respuesta se devuelve con código de estado
+ * {@code 422 Unprocessable Entity}, indicando que la petición fue correctamente
+ * interpretada por el servidor, pero contiene datos inválidos que impiden
+ * completar la operación solicitada.
  * </p>
  *
  * <p>
@@ -44,28 +45,22 @@ import local.alejandrogb.metricsservers.exceptions.api.ApiError;
 public class ValidationMapper implements ExceptionMapper<ValidationException> {
 
 	/**
-	 * Convierte una {@link ValidationException} en una respuesta HTTP
-	 * con código {@code 422 Unprocessable Entity}.
+	 * Convierte una {@link ValidationException} en una respuesta HTTP con código
+	 * {@code 422 Unprocessable Entity}.
 	 *
 	 * <p>
-	 * Este método es invocado automáticamente por el framework JAX-RS
-	 * cuando se lanza una excepción de tipo {@link ValidationException}.
+	 * Este método es invocado automáticamente por el framework JAX-RS cuando se
+	 * lanza una excepción de tipo {@link ValidationException}.
 	 * </p>
 	 *
-	 * @param e excepción de validación capturada durante el procesamiento
-	 *          de la petición
-	 * @return respuesta HTTP con código 422 y un objeto {@link ApiError}
-	 *         que describe el error de validación
+	 * @param e excepción de validación capturada durante el procesamiento de la
+	 *          petición
+	 * @return respuesta HTTP con código 422 y un objeto {@link ApiError} que
+	 *         describe el error de validación
 	 */
 	@Override
 	public Response toResponse(ValidationException e) {
 
-		return Response.status(422)
-				.entity(new ApiError(
-						"VALIDATION_ERROR",
-						e.getMessage(),
-						null
-				))
-				.build();
+		return Response.status(422).entity(new ApiError("VALIDATION_ERROR", e.getMessage(), null)).build();
 	}
 }

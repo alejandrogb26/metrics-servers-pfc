@@ -82,15 +82,6 @@ public class Permiso {
 				rs.getString(COL_DESCRIP_BY_SIMPL), Ambito.mapAmbitoToPermiso(rs));
 	}
 
-//	public Map<String, Object> toMap() {
-//		Map<String, Object> map = new LinkedHashMap<String, Object>();
-//
-//		map.put(COL_NOMBRE, nombre);
-//		map.put(COL_DESCRIP, descripcion);
-//		map.put(COL_AMBITO_ID, ambito.getId());
-//		return map;
-//	}
-
 	@Override
 	public String toString() {
 		return "Permiso [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + ", ambito=" + ambito + "]";

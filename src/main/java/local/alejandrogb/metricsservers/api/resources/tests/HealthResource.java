@@ -1,25 +1,31 @@
 package local.alejandrogb.metricsservers.api.resources.tests;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.ResultSet;
 
 import javax.sql.DataSource;
 
-import jakarta.annotation.Resource;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import local.alejandrogb.metricsservers.utils.GetDataSource;
 
+/**
+ * Endpoint de diagnóstico del sistema.
+ *
+ * <p>
+ * {@code GET /health/status} es público (necesario para healthchecks de
+ * infraestructura). El endpoint {@code /health/tables} se ha eliminado —
+ * exponer el esquema de la base de datos es un riesgo de seguridad innecesario.
+ * </p>
+ */
 @Path("/health")
 public class HealthResource {
-	@Resource(name = "jdbc/MariaDBDS")
-	private DataSource dataSource;
+
+	private final DataSource dataSource = GetDataSource.getDataSource();
 
 	@GET
 	@Path("/status")
@@ -39,32 +45,6 @@ public class HealthResource {
 		} catch (Exception e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity("{\"status\":\"ERROR\",\"message\":\"" + e.getMessage() + "\"}").build();
-		}
-	}
-
-	@GET
-	@Path("/tables")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTables() {
-
-		List<String> tables = new ArrayList<>();
-
-		try (Connection conn = dataSource.getConnection()) {
-
-			DatabaseMetaData meta = conn.getMetaData();
-
-			try (ResultSet rs = meta.getTables(conn.getCatalog(), // database
-					null, "%", new String[] { "TABLE" })) {
-
-				while (rs.next()) {
-					tables.add(rs.getString("TABLE_NAME"));
-				}
-			}
-
-			return Response.ok(tables).build();
-
-		} catch (Exception e) {
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 	}
 }

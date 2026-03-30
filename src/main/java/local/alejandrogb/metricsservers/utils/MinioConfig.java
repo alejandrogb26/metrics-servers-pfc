@@ -50,17 +50,17 @@ public class MinioConfig {
 	/**
 	 * Endpoint del servidor MinIO.
 	 */
-	public static final String ENDPOINT = "http://10.0.1.170:9000";
+	public static final String ENDPOINT = EnvConfig.MINIO_ENDPOINT;
 
 	/**
 	 * Clave de acceso utilizada para autenticarse en el servidor MinIO.
 	 */
-	private static final String ACCESS_KEY = "g4Zga7omMnQvdUQwMWc1";
+	private static final String ACCESS_KEY = EnvConfig.MINIO_ACCESS_KEY;
 
 	/**
 	 * Clave secreta asociada al usuario de acceso en MinIO.
 	 */
-	private static final String SECRET_KEY = "2sNneAqjcCJEqsDU08pvfnhEd2FuSNqS7QSFH4kF";
+	private static final String SECRET_KEY = EnvConfig.MINIO_SECRET_KEY;
 
 	/**
 	 * Devuelve la instancia del cliente {@link MinioClient}.

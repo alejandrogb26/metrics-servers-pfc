@@ -1,39 +1,53 @@
 package local.alejandrogb.metricsservers.models;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.ValidationException;
-import local.alejandrogb.metricsservers.models.usuario.UsuarioAuth;
-
-@Schema(name = "Session", description = "Información de sesión del usuario autenticado, incluyendo sus datos básicos, grupo y permisos")
 public class Session {
-	@Schema(description = "Datos básicos del usuario autenticado")
-	private UsuarioAuth usuario;
-
-	@Schema(description = "Grupo al que pertenece el usuario")
+	private String username;
+	private String displayName;
+	private String email;
 	private Grupo grupo;
-
-	@Schema(description = "Mapa de permisos del usuario (globales y por sección)")
 	private PermissionMap<String> permisos;
+	@JsonIgnore
+	private String fotoPerfil;
+	private String urlFoto;
 
 	public Session() {
 	}
 
-	public Session(UsuarioAuth usuario, Grupo grupo, PermissionMap<String> permisos) {
-		super();
-		this.usuario = usuario;
+	public Session(String username, String displayName, String email, Grupo grupo, PermissionMap<String> permisos,
+			String fotoPerfil, String urlFoto) {
+		this.username = username;
+		this.displayName = displayName;
+		this.email = email;
 		this.grupo = grupo;
 		this.permisos = permisos;
+		this.fotoPerfil = fotoPerfil;
+		this.urlFoto = urlFoto;
 	}
 
-	public UsuarioAuth getUsuario() {
-		return usuario;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setUsuario(UsuarioAuth usuario) {
-		this.usuario = usuario;
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public Grupo getGrupo() {
@@ -52,20 +66,26 @@ public class Session {
 		this.permisos = permisos;
 	}
 
-	public static Session mapSession(ResultSet rs) {
-		try {
-			if (!rs.getBoolean("active"))
-				throw new ValidationException("La cuenta de usuario está desactivada.");
+	@JsonIgnore
+	public String getFotoPerfil() {
+		return fotoPerfil;
+	}
 
-			return new Session(UsuarioAuth.mapUsuarioAuth(rs), Grupo.mapGrupoBySession(rs),
-					new PermissionMap<String>());
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
+	public void setFotoPerfil(String fotoPerfil) {
+		this.fotoPerfil = fotoPerfil;
+	}
+
+	public String getUrlFoto() {
+		return urlFoto;
+	}
+
+	public void setUrlFoto(String urlFoto) {
+		this.urlFoto = urlFoto;
 	}
 
 	@Override
 	public String toString() {
-		return "Session [usuario=" + usuario + ", grupo=" + grupo + ", permisos=" + permisos + "]";
+		return "Session [username=" + username + ", displayName=" + displayName + ", email=" + email + ", grupo="
+				+ grupo + ", permisos=" + permisos + ", fotoPerfil=" + fotoPerfil + ", urlFoto=" + urlFoto + "]";
 	}
 }

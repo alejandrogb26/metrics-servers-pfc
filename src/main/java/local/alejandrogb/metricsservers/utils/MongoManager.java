@@ -57,8 +57,10 @@ public class MongoManager {
 	 * de datos principal de la aplicación.
 	 */
 	private MongoManager() {
-		client = MongoClients.create("mongodb://monitoring_user:abc123.@10.0.1.26/monitoring");
-		database = client.getDatabase("monitoring");
+		String uri = EnvConfig.MONGO_URI;
+		client = MongoClients.create(uri);
+		String dbName = EnvConfig.MONGO_DB;
+		database = client.getDatabase(dbName);
 	}
 
 	/**

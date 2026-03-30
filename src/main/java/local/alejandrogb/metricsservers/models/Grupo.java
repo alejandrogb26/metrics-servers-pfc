@@ -2,7 +2,9 @@ package local.alejandrogb.metricsservers.models;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,16 +17,16 @@ public class Grupo {
 
 	public static final String COL_ID = "id";
 	public static final String COL_NOMBRE = "nombre";
-	public static final String COL_SUPER_ADMIN = "superadmin";
-
-	public static final String COL_ID_BY_SESSION = "gid";
-	public static final String COL_NOMBRE_BY_SESSION = "gnombre";
+	public static final String COL_DN = "dn";
+	public static final String COL_SUPERADMIN = "superadmin";
 
 	@Schema(description = "Identificador único del grupo", example = "1")
 	private int id;
 
 	@Schema(description = "Nombre del grupo", example = "Administradores")
 	private String nombre;
+
+	private String dn;
 
 	@Schema(description = "Indica si el grupo tiene privilegios de superadministrador", example = "true")
 	private Boolean superAdmin;
@@ -35,15 +37,17 @@ public class Grupo {
 	public Grupo() {
 	}
 
-	public Grupo(int id, String nombre, Boolean superAdmin) {
+	public Grupo(int id, String nombre, String dn, Boolean superAdmin) {
 		this.id = id;
 		this.nombre = nombre;
+		this.dn = dn;
 		this.superAdmin = superAdmin;
 	}
 
-	public Grupo(int id, String nombre, Boolean superAdmin, PermissionMap<Integer> permisos) {
+	public Grupo(int id, String nombre, String dn, Boolean superAdmin, PermissionMap<Integer> permisos) {
 		this.id = id;
 		this.nombre = nombre;
+		this.dn = dn;
 		this.superAdmin = superAdmin;
 		this.permisos = permisos;
 	}
@@ -64,6 +68,14 @@ public class Grupo {
 		this.nombre = nombre;
 	}
 
+	public String getDn() {
+		return dn;
+	}
+
+	public void setDn(String dn) {
+		this.dn = dn;
+	}
+
 	public Boolean isSuperAdmin() {
 		return superAdmin;
 	}
@@ -82,26 +94,27 @@ public class Grupo {
 
 	public static Grupo mapGrupo(ResultSet rs) {
 		try {
-			return new Grupo(rs.getInt(COL_ID), rs.getString(COL_NOMBRE), rs.getBoolean(COL_SUPER_ADMIN));
+			return new Grupo(rs.getInt(COL_ID), rs.getString(COL_NOMBRE), rs.getString(COL_DN),
+					rs.getBoolean(COL_SUPERADMIN));
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static Grupo mapGrupoBySession(ResultSet rs) {
-		try {
-			return new Grupo(rs.getInt(COL_ID_BY_SESSION), rs.getString(COL_NOMBRE_BY_SESSION),
-					rs.getBoolean(COL_SUPER_ADMIN));
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
+	public static List<Grupo> mapGrupos(ResultSet rs) throws SQLException {
+		List<Grupo> grupos = new ArrayList<>();
+		while (rs.next()) {
+			grupos.add(new Grupo(rs.getInt(COL_ID), rs.getString(COL_NOMBRE), rs.getString(COL_DN),
+					rs.getBoolean(COL_SUPERADMIN)));
 		}
+		return grupos;
 	}
 
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 
 		map.put(COL_NOMBRE, nombre);
-		map.put(COL_SUPER_ADMIN, superAdmin);
+		map.put(COL_SUPERADMIN, superAdmin);
 
 		return map;
 	}

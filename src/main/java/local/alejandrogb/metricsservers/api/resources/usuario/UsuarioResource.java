@@ -1,116 +1,79 @@
 package local.alejandrogb.metricsservers.api.resources.usuario;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import local.alejandrogb.metricsservers.api.services.usuario.UsuarioService;
-import local.alejandrogb.metricsservers.models.usuario.Usuario;
-import local.alejandrogb.metricsservers.utils.BulkResult;
 
-import io.swagger.v3.oas.annotations.*;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/usuario")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "Usuarios", description = "Gestión de usuarios del sistema")
+@Tag(name = "Usuarios", description = "Operaciones sobre el perfil del usuario autenticado")
 public class UsuarioResource {
 
 	private final UsuarioService service = new UsuarioService();
 
-	@GET
-	@Operation(summary = "Obtiene todos los usuarios")
-	@ApiResponse(responseCode = "200", description = "Lista de usuarios", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Usuario.class))))
-	public List<Usuario> getAll() {
-		return service.getAll();
-	}
-
-	@GET
-	@Path("/{id}")
-	@Operation(summary = "Obtiene un usuario por ID")
-	@ApiResponse(responseCode = "200", description = "Usuario encontrado", content = @Content(schema = @Schema(implementation = Usuario.class)))
-	@ApiResponse(responseCode = "404", description = "Usuario no encontrado")
-	public Response getById(@Parameter(description = "ID del usuario", example = "1") @PathParam("id") int id) {
-
-		Usuario u = service.getUsuario(id);
-
-		return (u != null) ? Response.ok(u).build() : Response.status(Response.Status.NOT_FOUND).build();
-	}
-
 	@POST
-	@Operation(summary = "Crear usuarios en lote")
-	@RequestBody(description = "Lista de usuarios a crear", required = true, content = @Content(array = @ArraySchema(schema = @Schema(implementation = Usuario.class))))
-	@ApiResponse(responseCode = "200", description = "Resultado de la creación", content = @Content(schema = @Schema(implementation = BulkResult.class)))
-	public Response create(List<Usuario> usuarios) {
-
-		BulkResult result = service.createUsuarios(usuarios);
-
-		return Response.ok(result).build();
-	}
-
-	@PATCH
-	@Path("/{id}")
-	@Operation(summary = "Actualizar parcialmente un usuario")
-	@RequestBody(description = "Campos del usuario a actualizar", content = @Content(schema = @Schema(implementation = Usuario.class)))
-	@ApiResponse(responseCode = "200", description = "Usuario actualizado")
-	@ApiResponse(responseCode = "404", description = "Usuario no encontrado")
-	public Response update(@Parameter(description = "ID del usuario", example = "1") @PathParam("id") int id,
-			Usuario datosParciales) {
-
-		boolean updated = service.patchUsuario(id, datosParciales);
-
-		return updated ? Response.ok().build() : Response.status(Response.Status.NOT_FOUND).build();
-	}
-
-	@DELETE
-	@Operation(summary = "Eliminar usuarios en lote")
-	@RequestBody(description = "Lista de IDs de usuarios", content = @Content(array = @ArraySchema(schema = @Schema(type = "integer"))))
-	@ApiResponse(responseCode = "200", description = "Resultado de la eliminación", content = @Content(schema = @Schema(implementation = BulkResult.class)))
-	public Response delete(List<Integer> ids) {
-
-		BulkResult result = service.deleteUsuarios(ids);
-
-		return Response.ok(result).build();
-	}
-
-	@POST
-	@Path("/{id}/foto")
+	@Path("/foto")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Operation(summary = "Subir foto de perfil del usuario")
+	@Operation(summary = "Subir foto de perfil", description = "Sube o reemplaza la foto de perfil del usuario autenticado. El usuario se identifica por el JWT.")
 	@ApiResponse(responseCode = "200", description = "Foto subida correctamente")
-	@ApiResponse(responseCode = "404", description = "Usuario no encontrado")
-	public Response subirFoto(@Parameter(description = "ID del usuario", example = "1") @PathParam("id") int id,
-			@FormDataParam("file") InputStream fileStream,
-			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+	@ApiResponse(responseCode = "400", description = "Archivo no proporcionado")
+	@ApiResponse(responseCode = "401", description = "Token no válido o ausente")
+	public Response subirFoto(@Context ContainerRequestContext requestContext,
+			@Multipart("file") Attachment fileAttachment) {
 
 		try {
+			if (fileAttachment == null) {
+				return Response.status(Status.BAD_REQUEST).entity(Map.of("error", "Archivo no proporcionado")).build();
+			}
 
-			Usuario u = service.getUsuario(id);
-			if (u == null)
-				return Response.status(Status.NOT_FOUND).build();
+			InputStream fileStream = fileAttachment.getObject(InputStream.class);
+			ContentDisposition contentDisposition = fileAttachment.getContentDisposition();
 
-			String extension = fileDetail.getFileName().substring(fileDetail.getFileName().lastIndexOf("."));
+			String originalFileName = null;
+			if (contentDisposition != null) {
+				originalFileName = contentDisposition.getParameter("filename");
+			}
 
-			String nombreArchivoMinio = "user_" + id + "_" + System.currentTimeMillis() + extension;
+			if (fileStream == null || originalFileName == null || originalFileName.isBlank()) {
+				return Response.status(Status.BAD_REQUEST).entity(Map.of("error", "Archivo no proporcionado")).build();
+			}
 
-			service.actualizarFotoPerfil(id, fileStream, nombreArchivoMinio);
+			String username = (String) requestContext.getProperty("username");
+
+			if (username == null || username.isBlank()) {
+				return Response.status(Status.UNAUTHORIZED).entity(Map.of("error", "Token no válido")).build();
+			}
+
+			int lastDot = originalFileName.lastIndexOf('.');
+			String extension = lastDot >= 0 ? originalFileName.substring(lastDot) : "";
+
+			String nombreArchivoMinio = "user_" + username + "_" + System.currentTimeMillis() + extension;
+
+			service.actualizarFotoPerfil(username, fileStream, nombreArchivoMinio);
 
 			return Response.ok(Map.of("nombreArchivo", nombreArchivoMinio)).build();
 
 		} catch (Exception e) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Map.of("error", e.getMessage())).build();
 		}
 	}
 }

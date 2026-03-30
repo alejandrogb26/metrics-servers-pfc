@@ -59,3 +59,8 @@ replay_pid*
 *.BASE.*
 *.LOCAL.*
 *.REMOTE.*
+
+# ======================
+# Variables de entorno
+# ======================
+.env

@@ -43,8 +43,8 @@ public class ApiError {
 	 * Mensaje principal que describe el error ocurrido.
 	 *
 	 * <p>
-	 * Este mensaje está pensado para ser legible por humanos y explicar
-	 * de forma clara el problema.
+	 * Este mensaje está pensado para ser legible por humanos y explicar de forma
+	 * clara el problema.
 	 * </p>
 	 */
 	public String message;
@@ -53,8 +53,8 @@ public class ApiError {
 	 * Información adicional sobre el error.
 	 *
 	 * <p>
-	 * Puede incluir detalles técnicos o información específica que ayude
-	 * a comprender mejor el contexto del fallo.
+	 * Puede incluir detalles técnicos o información específica que ayude a
+	 * comprender mejor el contexto del fallo.
 	 * </p>
 	 */
 	public String details;
@@ -62,7 +62,7 @@ public class ApiError {
 	/**
 	 * Crea una nueva instancia de {@link ApiError}.
 	 *
-	 * @param code código identificador del error
+	 * @param code    código identificador del error
 	 * @param message mensaje descriptivo del error
 	 * @param details información adicional sobre el error
 	 */

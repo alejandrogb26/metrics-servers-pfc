@@ -70,7 +70,8 @@ public class ServidorProbeService {
 			ssh.setTimeout(5000);
 
 			ssh.connect(host);
-			ssh.authPassword("root", "abc123.");
+			ssh.authPassword(System.getenv().getOrDefault("SSH_PROBE_USER", "root"),
+					System.getenv("SSH_PROBE_PASSWORD"));
 
 			String hostname = exec(ssh, "hostname");
 			String os = exec(ssh, "cat /etc/os-release | grep PRETTY_NAME | cut -d= -f2 | tr -d '\"'");

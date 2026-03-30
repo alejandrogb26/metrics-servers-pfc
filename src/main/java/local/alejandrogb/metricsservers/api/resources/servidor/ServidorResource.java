@@ -4,25 +4,36 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import jakarta.ws.rs.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
 import local.alejandrogb.metricsservers.api.services.servidor.ServidorService;
 import local.alejandrogb.metricsservers.models.metrics.MetricPoint;
 import local.alejandrogb.metricsservers.models.servidor.Servidor;
 import local.alejandrogb.metricsservers.models.servidor.ServidorDTO;
 import local.alejandrogb.metricsservers.utils.BulkResult;
-
-import io.swagger.v3.oas.annotations.*;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.media.*;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @Path("/servidor")
 @Produces(MediaType.APPLICATION_JSON)
@@ -142,16 +153,32 @@ public class ServidorResource {
 	@ApiResponse(responseCode = "200", description = "Foto subida correctamente")
 	@ApiResponse(responseCode = "404", description = "Servidor no encontrado")
 	public Response subirFoto(@Parameter(description = "ID del servidor", example = "1") @PathParam("id") int id,
-			@FormDataParam("file") InputStream fileStream,
-			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+			@Multipart("file") Attachment fileAttachment) {
 
 		try {
-
 			Servidor s = service.findServidorById(id);
-			if (s == null)
+			if (s == null) {
 				return Response.status(Status.NOT_FOUND).build();
+			}
 
-			String extension = fileDetail.getFileName().substring(fileDetail.getFileName().lastIndexOf("."));
+			if (fileAttachment == null) {
+				return Response.status(Status.BAD_REQUEST).entity(Map.of("error", "Archivo no proporcionado")).build();
+			}
+
+			InputStream fileStream = fileAttachment.getObject(InputStream.class);
+			ContentDisposition contentDisposition = fileAttachment.getContentDisposition();
+
+			String originalFileName = null;
+			if (contentDisposition != null) {
+				originalFileName = contentDisposition.getParameter("filename");
+			}
+
+			if (fileStream == null || originalFileName == null || originalFileName.isBlank()) {
+				return Response.status(Status.BAD_REQUEST).entity(Map.of("error", "Archivo no proporcionado")).build();
+			}
+
+			int lastDot = originalFileName.lastIndexOf('.');
+			String extension = lastDot >= 0 ? originalFileName.substring(lastDot) : "";
 
 			String nombreArchivoMinio = "server_" + id + "_" + System.currentTimeMillis() + extension;
 
@@ -160,7 +187,7 @@ public class ServidorResource {
 			return Response.ok(Map.of("nombreArchivo", nombreArchivoMinio)).build();
 
 		} catch (Exception e) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Map.of("error", e.getMessage())).build();
 		}
 	}
 

@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,8 +14,8 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import jakarta.validation.ValidationException;
 import local.alejandrogb.metricsservers.exceptions.DaoException;
+import jakarta.validation.ValidationException;
 import local.alejandrogb.metricsservers.models.Ambito;
 import local.alejandrogb.metricsservers.models.Grupo;
 import local.alejandrogb.metricsservers.models.Permiso;
@@ -25,8 +24,7 @@ import local.alejandrogb.metricsservers.models.Seccion;
 import local.alejandrogb.metricsservers.models.Servicio;
 import local.alejandrogb.metricsservers.models.Session;
 import local.alejandrogb.metricsservers.models.servidor.Servidor;
-import local.alejandrogb.metricsservers.models.usuario.ApiToken;
-import local.alejandrogb.metricsservers.models.usuario.Usuario;
+import local.alejandrogb.metricsservers.models.usuario.UsuarioApp;
 import local.alejandrogb.metricsservers.utils.GetDataSource;
 import local.alejandrogb.metricsservers.utils.SqlQueries;
 import local.alejandrogb.metricsservers.utils.interfaces.SQLConsumer;
@@ -895,184 +893,47 @@ public class DaoApi {
 	}
 
 	// ==========================================
-	// MÉTODOS USUARIO
+	// MÉTODOS USUARIO APP
 	// ==========================================
-
 	/**
-	 * Recupera un usuario a partir de su identificador.
-	 *
-	 * <p>
-	 * Este método ejecuta una consulta sobre la tabla de usuarios y transforma el
-	 * resultado en un objeto {@link Usuario} mediante el método
-	 * {@link Usuario#mapUsuario(ResultSet)}.
-	 * </p>
-	 *
-	 * @param id identificador del usuario
-	 * @return objeto {@link Usuario} correspondiente al identificador indicado, o
-	 *         {@code null} si no existe
-	 * @throws DaoException si ocurre un error durante la consulta
+	 * Busca un registro en usuarios_app por su username (sAMAccountName).
 	 */
-	public Usuario findUsuarioById(int id) {
+	public UsuarioApp getUsuarioAppByUsername(String username) {
 		try {
-			return findOne(SqlQueries.FIND_FULL_USER_BY_ID, ps -> ps.setInt(1, id), rs -> Usuario.mapUsuario(rs));
+			return findOne(SqlQueries.FIND_USUARIO_APP_BY_USERNAME, ps -> ps.setString(1, username),
+					UsuarioApp::mapUsuarioApp);
 		} catch (SQLException e) {
-			throw new DaoException("Error al buscar usuario por ID: " + id, e);
+			throw new DaoException("Error obteniendo usuario_app por username", e);
 		}
 	}
 
 	/**
-	 * Recupera todos los usuarios registrados en el sistema.
+	 * Inserta un nuevo registro en usuarios_app.
 	 *
-	 * <p>
-	 * Los resultados se transforman en objetos {@link Usuario} mediante el método
-	 * {@link Usuario#mapUsuario(ResultSet)}.
-	 * </p>
-	 *
-	 * @return lista de usuarios existentes en el sistema
-	 * @throws DaoException si ocurre un error durante la consulta
+	 * @param usuarioApp datos del usuario a insertar
+	 * @return id generado
 	 */
-	public List<Usuario> findAllUsuarios() {
-		try {
-			return findAll(SqlQueries.FIND_FULL_USER, null, rs -> mapList(rs, r -> Usuario.mapUsuario(r)));
-		} catch (SQLException e) {
-			throw new DaoException("Error al recuperar todos los usuarios", e);
-		}
-	}
-
-	/**
-	 * Inserta un único usuario en la base de datos.
-	 *
-	 * <p>
-	 * El usuario se persiste en la tabla {@link Usuario#TABLE} y se devuelve el
-	 * identificador generado por la base de datos.
-	 * </p>
-	 *
-	 * @param usuario objeto {@link Usuario} que contiene los datos del usuario a
-	 *                insertar
-	 * @return identificador generado para el nuevo usuario
-	 * @throws SQLException si ocurre un error durante la inserción
-	 */
-	public int insertSingleUsuario(Usuario usuario) throws SQLException {
-
+	public int insertUsuarioApp(UsuarioApp usuarioApp) {
 		try (Connection conn = getDS().getConnection()) {
-			return insert(conn, Usuario.TABLE, usuario.toMap());
-		}
-	}
-
-	/**
-	 * Inserta múltiples usuarios en la base de datos utilizando inserción por lotes
-	 * (batch).
-	 *
-	 * <p>
-	 * Este método mejora el rendimiento al permitir insertar múltiples registros en
-	 * una sola operación mediante {@link PreparedStatement#executeBatch()}.
-	 * </p>
-	 *
-	 * @param usuarios lista de usuarios a insertar
-	 * @return número total de registros insertados
-	 * @throws DaoException si ocurre un error durante la operación
-	 */
-	public int insertUsuarios(List<Usuario> usuarios) {
-
-		if (usuarios == null || usuarios.isEmpty())
-			return 0;
-
-		try (Connection conn = getDS().getConnection()) {
-
-			List<Map<String, Object>> rows = usuarios.stream().map(Usuario::toMap).collect(Collectors.toList());
-
-			int[] results = insertBatch(conn, Usuario.TABLE, rows);
-
-			return Arrays.stream(results).sum();
-
+			return insert(conn, UsuarioApp.TABLE, usuarioApp.toInsertMap());
 		} catch (SQLException e) {
-			throw new DaoException("Error al insertar usuarios en bloque", e);
+			throw new DaoException("Error insertando usuario_app", e);
 		}
 	}
 
 	/**
-	 * Actualiza los campos de un usuario existente.
+	 * Actualiza la foto de perfil de un registro en usuarios_app.
 	 *
-	 * <p>
-	 * Permite realizar una actualización parcial mediante un mapa de campos y
-	 * valores. Cada entrada del mapa representa una columna de la base de datos y
-	 * su nuevo valor.
-	 * </p>
-	 *
-	 * @param id     identificador del usuario a actualizar
-	 * @param fields mapa de columnas y valores a modificar
-	 * @return {@code true} si el usuario fue actualizado correctamente,
-	 *         {@code false} si no se modificó ningún registro
-	 * @throws DaoException si ocurre un error durante la operación
+	 * @param id         id del registro en usuarios_app
+	 * @param fotoPerfil nombre del archivo en MinIO
 	 */
-	public boolean updateUsuario(int id, Map<String, Object> fields) {
-
+	public boolean updateUsuarioAppFoto(int id, String fotoPerfil) {
 		try (Connection conn = getDS().getConnection()) {
-
-			return update(conn, Usuario.TABLE, fields, Usuario.COL_ID + " = ?", new Object[] { id });
-
+			Map<String, Object> fields = new LinkedHashMap<>();
+			fields.put(UsuarioApp.COL_FOTO_PERFIL, fotoPerfil);
+			return update(conn, UsuarioApp.TABLE, fields, UsuarioApp.COL_ID + " = ?", new Object[] { id });
 		} catch (SQLException e) {
-			throw new DaoException("Error al actualizar el usuario ID: " + id, e);
-		}
-	}
-
-	/**
-	 * Elimina un usuario del sistema a partir de su identificador.
-	 *
-	 * @param id identificador del usuario a eliminar
-	 * @return {@code true} si el usuario fue eliminado correctamente, {@code false}
-	 *         si no existía un registro con ese identificador
-	 * @throws SQLException si ocurre un error durante la operación
-	 */
-	public boolean deleteSingleUsuario(int id) throws SQLException {
-
-		try (Connection conn = getDS().getConnection()) {
-			return deleteOne(conn, Usuario.TABLE, Usuario.COL_ID, id);
-		}
-	}
-
-	/**
-	 * Elimina múltiples usuarios a partir de una lista de identificadores.
-	 *
-	 * <p>
-	 * La eliminación se realiza mediante una cláusula {@code IN}, permitiendo
-	 * borrar varios registros en una sola operación.
-	 * </p>
-	 *
-	 * @param ids lista de identificadores de usuarios a eliminar
-	 * @return número total de usuarios eliminados
-	 * @throws DaoException si ocurre un error durante la operación
-	 */
-	public int deleteUsuarios(List<Integer> ids) {
-
-		try (Connection conn = getDS().getConnection()) {
-
-			return deleteAll(conn, Usuario.TABLE, Usuario.COL_ID, ids);
-
-		} catch (SQLException e) {
-			throw new DaoException("Error al eliminar usuarios", e);
-		}
-	}
-
-	/**
-	 * Busca nombres de usuario que comiencen con un prefijo determinado.
-	 *
-	 * <p>
-	 * Este método se utiliza habitualmente para comprobar la disponibilidad de
-	 * nombres de usuario o generar variantes únicas durante procesos de registro.
-	 * </p>
-	 *
-	 * @param baseUsername prefijo del nombre de usuario a buscar
-	 * @return lista de usernames que coinciden con el patrón
-	 * @throws DaoException si ocurre un error durante la consulta
-	 */
-	public List<String> findUsernamesLike(String baseUsername) {
-
-		try {
-			return findAll(SqlQueries.FIND_USERNAME_USER, ps -> ps.setString(1, baseUsername + "%"),
-					rs -> mapList(rs, r -> r.getString("username")));
-		} catch (SQLException e) {
-			throw new DaoException("Error al buscar usernames similares", e);
+			throw new DaoException("Error actualizando foto en usuario_app", e);
 		}
 	}
 
@@ -1265,7 +1126,7 @@ public class DaoApi {
 				fields.put(Grupo.COL_NOMBRE, grupo.getNombre());
 
 			if (grupo.isSuperAdmin() != null)
-				fields.put(Grupo.COL_SUPER_ADMIN, grupo.isSuperAdmin());
+				fields.put(Grupo.COL_SUPERADMIN, grupo.isSuperAdmin());
 
 			if (!fields.isEmpty()) {
 				update(conn, Grupo.TABLE, fields, Grupo.COL_ID + " = ?", new Object[] { id });
@@ -1340,162 +1201,93 @@ public class DaoApi {
 	}
 
 	// ==========================================
-	// MÉTODOS TOKEN
-	// ==========================================
-
-	/**
-	 * Recupera todos los tokens API asociados a un usuario.
-	 *
-	 * <p>
-	 * Este método consulta la tabla de tokens API y devuelve la lista de tokens
-	 * registrados para el usuario indicado.
-	 * </p>
-	 *
-	 * <p>
-	 * Los registros obtenidos se transforman en objetos {@link ApiToken} mediante
-	 * el método {@link ApiToken#mapToken(ResultSet)}.
-	 * </p>
-	 *
-	 * @param usuarioId identificador del usuario
-	 * @return lista de tokens API asociados al usuario
-	 * @throws DaoException si ocurre un error durante la consulta
-	 */
-	public List<ApiToken> findTokensByUsuario(int usuarioId) {
-
-		try {
-			return findAll(SqlQueries.FIND_TOKENS_BY_USUARIOID, ps -> ps.setInt(1, usuarioId),
-					rs -> mapList(rs, ApiToken::mapToken));
-		} catch (SQLException e) {
-			throw new DaoException("Error al listar tokens del usuario", e);
-		}
-	}
-
-	/**
-	 * Crea un nuevo token de acceso para un usuario.
-	 *
-	 * <p>
-	 * El token se almacena en la tabla {@link ApiToken#TABLE} con estado activo por
-	 * defecto. Este token podrá utilizarse posteriormente para autenticar
-	 * peticiones a la API.
-	 * </p>
-	 *
-	 * @param usuarioId  identificador del usuario propietario del token
-	 * @param tokenValue valor del token generado
-	 * @return identificador generado para el nuevo token
-	 * @throws DaoException si ocurre un error durante la inserción
-	 */
-	public int createToken(int usuarioId, String tokenValue) {
-
-		try (Connection conn = getDS().getConnection()) {
-
-			Map<String, Object> values = new LinkedHashMap<>();
-
-			values.put(ApiToken.COL_USER_ID, usuarioId);
-			values.put(ApiToken.COL_TOKEN, tokenValue);
-			values.put(ApiToken.COL_ACTIVE, true);
-
-			return insert(conn, ApiToken.TABLE, values);
-
-		} catch (SQLException e) {
-			throw new DaoException("Error al insertar nuevo token", e);
-		}
-	}
-
-	/**
-	 * Actualiza el estado de un token de API.
-	 *
-	 * <p>
-	 * Este método permite activar o desactivar un token existente. Los tokens
-	 * desactivados no podrán utilizarse para autenticación en el sistema.
-	 * </p>
-	 *
-	 * @param tokenId identificador del token
-	 * @param active  {@code true} para activar el token, {@code false} para
-	 *                desactivarlo
-	 * @return {@code true} si el estado del token fue actualizado correctamente,
-	 *         {@code false} si no se modificó ningún registro
-	 * @throws DaoException si ocurre un error durante la operación
-	 */
-	public boolean updateTokenStatus(int tokenId, boolean active) {
-
-		try (Connection conn = getDS().getConnection()) {
-
-			Map<String, Object> fields = Map.of(ApiToken.COL_ACTIVE, active);
-
-			return update(conn, ApiToken.TABLE, fields, ApiToken.COL_ID + " = ?", new Object[] { tokenId });
-
-		} catch (SQLException e) {
-			throw new DaoException("Error al cambiar estado del token", e);
-		}
-	}
-
-	// ==========================================
 	// MÉTODOS AUTHENTICATION
 	// ==========================================
-
-	/**
-	 * Recupera la sesión de un usuario a partir de un token de autenticación.
-	 *
-	 * <p>
-	 * Este método se utiliza durante el proceso de autenticación de la API. A
-	 * partir del token recibido se realiza una consulta que obtiene:
-	 * </p>
-	 *
-	 * <ul>
-	 * <li>Información del usuario asociado al token</li>
-	 * <li>Información del grupo al que pertenece el usuario</li>
-	 * <li>Estado del usuario (activo o no)</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * Si el token es válido y el usuario pertenece a un grupo que no es
-	 * superadministrador, el sistema carga además los permisos asociados al grupo:
-	 * </p>
-	 *
-	 * <ul>
-	 * <li>Permisos globales</li>
-	 * <li>Permisos específicos por sección</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * Los permisos se encapsulan en un {@link PermissionMap} y se asignan al objeto
-	 * {@link Session}. En el caso de grupos con privilegios de superadministrador,
-	 * no se cargan permisos explícitos ya que estos tienen acceso completo al
-	 * sistema.
-	 * </p>
-	 *
-	 * @param token valor del token de autenticación proporcionado por el cliente
-	 * @return objeto {@link Session} con la información del usuario, grupo y
-	 *         permisos asociados, o {@code null} si el token no es válido
-	 * @throws DaoException si ocurre un error durante la consulta
-	 */
-	public Session getSessionByToken(String token) {
+	public Grupo getGrupoByAnyDn(List<String> dns) {
+		if (dns == null || dns.isEmpty()) {
+			return null;
+		}
 
 		try {
+			String placeholders = String.join(",", java.util.Collections.nCopies(dns.size(), "?"));
+			String sql = String.format(SqlQueries.FIND_GRUPOS_BY_DNS_BASE, placeholders);
 
-			Session session = findOne(SqlQueries.FIND_USER_GROUP_AUTH, ps -> ps.setString(1, token),
-					Session::mapSession);
+			List<Grupo> grupos = findAll(sql, ps -> {
+				for (int i = 0; i < dns.size(); i++) {
+					ps.setString(i + 1, dns.get(i));
+				}
+			}, Grupo::mapGrupos);
 
-			if (session == null)
+			if (grupos == null || grupos.isEmpty()) {
 				return null;
-
-			// Session espera PermissionMap<String>
-			PermissionMap<String> pMap = new PermissionMap<>(new ArrayList<>(), new HashMap<>());
-
-			if (session.getGrupo() != null && !session.getGrupo().isSuperAdmin()) {
-
-				int gId = session.getGrupo().getId();
-
-				pMap.setGlobal(getGlobalPermissionNames(gId));
-				pMap.setSections(getSectionPermissionNames(gId));
 			}
 
-			session.setPermisos(pMap);
+			if (grupos.size() > 1) {
+				throw new DaoException("El usuario pertenece a más de un grupo válido de la aplicación");
+			}
 
-			return session;
+			return grupos.get(0);
 
 		} catch (SQLException e) {
-			throw new DaoException("Error Session", e);
+			throw new DaoException("Error obteniendo grupo por DN", e);
+		}
+	}
+
+	public UsuarioApp getUsuarioAppByAdObjectId(String adObjectId) {
+		try {
+			return findOne(SqlQueries.FIND_USUARIO_APP_BY_AD_OBJECT_ID, ps -> ps.setString(1, adObjectId),
+					UsuarioApp::mapUsuarioApp);
+		} catch (SQLException e) {
+			throw new DaoException("Error obteniendo usuario_app por adObjectId", e);
+		}
+	}
+
+	/**
+	 * Construye el objeto {@link Session} a partir de los datos obtenidos del AD.
+	 *
+	 * <p>
+	 * Este método:
+	 * <ol>
+	 * <li>Carga los permisos del grupo (globales y por sección).</li>
+	 * <li>Lee la foto de perfil del usuario desde {@code usuarios_app}.</li>
+	 * <li>Genera la URL firmada de MinIO.</li>
+	 * <li>Construye y devuelve el objeto {@link Session}.</li>
+	 * </ol>
+	 * </p>
+	 *
+	 * @param username    sAMAccountName del usuario
+	 * @param displayName nombre completo del AD
+	 * @param mail        correo del AD
+	 * @param grupo       grupo interno resuelto
+	 * @return sesión completa lista para incluir en la respuesta
+	 */
+	/**
+	 * Construye el objeto {@link Session} a partir de los datos del AD. Carga
+	 * permisos y la foto de perfil desde {@code usuarios_app}. La generación de la
+	 * URL de MinIO se delega al servicio que invoca este método.
+	 *
+	 * @return sesión con permisos y fotoPerfil cargados (urlFoto = null, se rellena
+	 *         en AuthService)
+	 */
+	public Session buildSessionFromAdUser(String username, String displayName, String mail, Grupo grupo) {
+		try {
+			// 1. Cargar permisos (superadmin no necesita permisos explícitos)
+			PermissionMap<String> pMap = new PermissionMap<>(new ArrayList<>(), new HashMap<>());
+
+			if (grupo != null && !Boolean.TRUE.equals(grupo.isSuperAdmin())) {
+				pMap.setGlobal(getGlobalPermissionNames(grupo.getId()));
+				pMap.setSections(getSectionPermissionNames(grupo.getId()));
+			}
+
+			// 2. Leer foto de perfil desde usuarios_app
+			UsuarioApp usuarioApp = getUsuarioAppByUsername(username);
+			String fotoPerfil = (usuarioApp != null) ? usuarioApp.getFotoPerfil() : null;
+
+			// 3. urlFoto se resuelve en la capa de servicio (AuthService)
+			return new Session(username, displayName, mail, grupo, pMap, fotoPerfil, null);
+
+		} catch (SQLException e) {
+			throw new DaoException("Error construyendo sesión de usuario AD", e);
 		}
 	}
 
